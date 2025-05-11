@@ -68,6 +68,8 @@ abstract contract DeleGatorCore is
     /// @dev Event emitted when prefunding is sent.
     event SentPrefund(address indexed sender, uint256 amount, bool success);
 
+    event HandleDelegatorAddressSet(bytes handle, address indexed delegatorAddress);
+
     ////////////////////////////// Errors //////////////////////////////
 
     /// @dev Error thrown when the caller is not this contract.
@@ -166,6 +168,10 @@ abstract contract DeleGatorCore is
         onlyEntryPointOrSelf
     {
         delegationManager.redeemDelegations(_permissionContexts, _modes, _executionCallDatas);
+    }
+
+    function setHandleDelegatorAddress(bytes calldata handle, address delegatorAddress) external {
+        emit HandleDelegatorAddressSet(handle, delegatorAddress);
     }
 
     /**
