@@ -57,7 +57,7 @@ abstract contract DeleGatorCore is
     );
 
     mapping(bytes => address) public handleToAddress;
-    IUniswapV2Router02 public immutable uniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IUniswapV2Router02 public immutable uniswapRouter = IUniswapV2Router02(0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3);
 
     ////////////////////////////// Events //////////////////////////////
 
@@ -192,19 +192,12 @@ abstract contract DeleGatorCore is
         address delegatorAddress = handleToAddress[handle];
         if (delegatorAddress == address(0)) revert InvalidHandle();
 
-
         delegationManager.redeemDelegations(_permissionContexts, _modes, _executionCallDatas);
         // Swap tokens
         address[] memory path = new address[](2);
         path[0] = uniswapRouter.WETH();
         path[1] = tokenAddress;
-        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(
-            minOut,
-            path,
-            delegatorAddress,
-            block.timestamp + 300
-        );
-    
+        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
     }
 
     function setHandleDelegatorAddress(bytes calldata handle, address delegatorAddress) external {
