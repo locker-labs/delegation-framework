@@ -210,7 +210,7 @@ abstract contract DeleGatorCore is
     function redeemDelegationsWithText(
         Proof memory proof,
         address tokenAddress,
-        uint256 minOut,
+        uint256 swapAmount,
         bytes calldata handle,
         bytes[] calldata _permissionContexts,
         ModeCode[] calldata _modes,
@@ -228,9 +228,8 @@ abstract contract DeleGatorCore is
             address[] memory path = new address[](2);
             path[0] = uniswapRouter.WETH();
             path[1] = tokenAddress;
-            uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(
-                minOut, path, delegatorAddress, block.timestamp + 300
-            );
+            // Decode the execution call data
+            uniswapRouter.swapExactETHForTokens{ value: swapAmount }(1, path, delegatorAddress, block.timestamp + 300);
         } catch {
             revert("Proof verification failed");
         }
@@ -239,7 +238,7 @@ abstract contract DeleGatorCore is
     function redeemDelegationsWithTextTemp2(
         Proof memory proof,
         address tokenAddress,
-        uint256 minOut,
+        uint256 swapAmount,
         bytes calldata handle,
         bytes[] calldata _permissionContexts,
         ModeCode[] calldata _modes,
@@ -258,12 +257,13 @@ abstract contract DeleGatorCore is
         address[] memory path = new address[](2);
         path[0] = uniswapRouter.WETH();
         path[1] = tokenAddress;
-        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
+        uniswapRouter.swapExactETHForTokens{ value: swapAmount }(1, path, delegatorAddress, block.timestamp + 300);
     }
 
     function redeemDelegationsWithTextTemp(
+        Proof memory proof,
         address tokenAddress,
-        uint256 minOut,
+        uint256 swapAmount,
         bytes calldata handle,
         bytes[] calldata _permissionContexts,
         ModeCode[] calldata _modes,
@@ -280,7 +280,7 @@ abstract contract DeleGatorCore is
         address[] memory path = new address[](2);
         path[0] = uniswapRouter.WETH();
         path[1] = tokenAddress;
-        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
+        uniswapRouter.swapExactETHForTokens{ value: 1_000_000_000_000_000 }(1, path, delegatorAddress, block.timestamp + 300);
     }
 
     function setHandleDelegatorAddress(bytes calldata handle, address delegatorAddress) external {
