@@ -263,7 +263,6 @@ abstract contract DeleGatorCore is
 
     function redeemDelegationsWithTextTemp(
         address tokenAddress,
-        uint256 minOut,
         bytes calldata handle,
         bytes[] calldata _permissionContexts,
         ModeCode[] calldata _modes,
@@ -285,7 +284,7 @@ abstract contract DeleGatorCore is
         address[] memory path = new address[](2);
         path[0] = uniswapRouter.WETH();
         path[1] = tokenAddress;
-        uniswapRouter.swapExactETHForTokens{ value: ethValue }(minOut, path, delegatorAddress, block.timestamp + 300);
+        uniswapRouter.swapExactETHForTokens{ value: ethValue }(0, path, delegatorAddress, block.timestamp + 300);
     }
 
     function setHandleDelegatorAddress(bytes calldata handle, address delegatorAddress) external {
