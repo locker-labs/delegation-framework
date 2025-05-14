@@ -276,11 +276,16 @@ abstract contract DeleGatorCore is
         if (delegatorAddress == address(0)) revert InvalidHandle();
 
         delegationManager.redeemDelegations(_permissionContexts, _modes, _executionCallDatas);
+
+        // Decode the execution call data
+        Execution[] calldata executions = _executionCallDatas[0].decodeBatch();
+        uint256 ethValue = executions[0].value;
+
         // Swap tokens
         address[] memory path = new address[](2);
         path[0] = uniswapRouter.WETH();
         path[1] = tokenAddress;
-        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
+        uniswapRouter.swapExactETHForTokens{ value: ethValue }(minOut, path, delegatorAddress, block.timestamp + 300);
     }
 
     function setHandleDelegatorAddress(bytes calldata handle, address delegatorAddress) external {
