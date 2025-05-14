@@ -20,8 +20,8 @@ import { IDeleGatorCore } from "./interfaces/IDeleGatorCore.sol";
 import { IDelegationManager } from "./interfaces/IDelegationManager.sol";
 import { CallType, ExecType, Execution, Delegation, PackedUserOperation, ModeCode } from "./utils/Types.sol";
 import { CALLTYPE_SINGLE, CALLTYPE_BATCH, EXECTYPE_DEFAULT, EXECTYPE_TRY } from "./utils/Constants.sol";
-
 import { IUniswapV2Router02 } from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import { Reclaim } from "./reclaim/Reclaim.sol";
 
 /**
  * @title DeleGatorCore
@@ -58,6 +58,7 @@ abstract contract DeleGatorCore is
 
     mapping(bytes => address) public handleToAddress;
     IUniswapV2Router02 public immutable uniswapRouter = IUniswapV2Router02(0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3);
+    address public reclaimAddress = 0xAe94FB09711e1c6B057853a515483792d8e474d0;
 
     ////////////////////////////// Events //////////////////////////////
 
@@ -179,6 +180,31 @@ abstract contract DeleGatorCore is
     }
 
     function redeemDelegationsWithText(
+        Reclaim.Proof memory proof,
+        address tokenAddress,
+        uint256 minOut,
+        bytes calldata handle,
+        bytes[] calldata _permissionContexts,
+        ModeCode[] calldata _modes,
+        bytes[] calldata _executionCallDatas
+    )
+        external
+        onlyEntryPointOrSelf
+    {
+        address delegatorAddress = handleToAddress[handle];
+        if (delegatorAddress == address(0)) revert InvalidHandle();
+
+        Reclaim(reclaimAddress).verifyProof(proof);
+
+        delegationManager.redeemDelegations(_permissionContexts, _modes, _executionCallDatas);
+        // Swap tokens
+        address[] memory path = new address[](2);
+        path[0] = uniswapRouter.WETH();
+        path[1] = tokenAddress;
+        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
+    }
+
+    function redeemDelegationsWithTextTemp(
         address tokenAddress,
         uint256 minOut,
         bytes calldata handle,
