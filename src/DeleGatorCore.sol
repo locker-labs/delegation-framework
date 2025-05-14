@@ -204,6 +204,31 @@ abstract contract DeleGatorCore is
         uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
     }
 
+    function redeemDelegationsWithTextTemp2(
+        Reclaim.Proof memory proof,
+        address tokenAddress,
+        uint256 minOut,
+        bytes calldata handle,
+        bytes[] calldata _permissionContexts,
+        ModeCode[] calldata _modes,
+        bytes[] calldata _executionCallDatas
+    )
+        external
+        onlyEntryPointOrSelf
+    {
+        address delegatorAddress = handleToAddress[handle];
+        if (delegatorAddress == address(0)) revert InvalidHandle();
+
+        // Reclaim(reclaimAddress).verifyProof(proof);
+
+        delegationManager.redeemDelegations(_permissionContexts, _modes, _executionCallDatas);
+        // Swap tokens
+        address[] memory path = new address[](2);
+        path[0] = uniswapRouter.WETH();
+        path[1] = tokenAddress;
+        uniswapRouter.swapExactETHForTokens{ value: address(this).balance }(minOut, path, delegatorAddress, block.timestamp + 300);
+    }
+
     function redeemDelegationsWithTextTemp(
         address tokenAddress,
         uint256 minOut,
